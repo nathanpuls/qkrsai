@@ -41,10 +41,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 px-4 w-full max-w-lg">
       <div className="bg-white/90 backdrop-blur-md border border-gray-100 rounded-2xl shadow-xl flex items-center justify-between p-2">
         <Button icon="ph-magnifying-glass" onClick={onSearch} label="Search (Alt+S)" />
-        <Button icon="ph-house" onClick={onHome} label="Go Home" />
+        <Button icon="ph-house-simple" onClick={onHome} label="Go Home" />
         
         <Button icon="ph-copy" onClick={onCopy} label="Copy Content" />
-        <Button icon="ph-link" onClick={onCopyLink} label="Copy Link" />
+        <Button icon="ph-link-simple-horizontal" onClick={onCopyLink} label="Copy Link" />
         <Button icon="ph-qr-code" onClick={onQR} label="Show QR Code" />
 
         <div className="h-8 w-px bg-gray-100 mx-1"></div>

@@ -4,14 +4,6 @@ import React from 'react';
 /**
  * Robust formatter that converts plain text into clickable elements.
  * Uses a single-pass scanning approach to handle overlapping patterns correctly.
- * 
- * Supported:
- * - Protocols: http://, https://, tel:
- * - Naked domains: qk.rs, www.qk.rs, sub.domain.com/path
- * - International & Local Phones: 
- *   +61 2 9374 4000, 555-123-4567, (555) 987-6543, 555.321.9876, 555 444 3333, +1 555 222 1111
- * - Emails: user@example.com
- * - Slash paths: /internal/links
  */
 
 interface MatchResult {
@@ -106,7 +98,8 @@ export const formatContent = (content: string): React.ReactNode[] => {
     }
 
     // 6. Slash paths (/home, /a/b/c)
-    const pathRegex = /(?:^|\s)(\/[a-zA-Z0-9\-_/]+)/g;
+    // CRITICAL FIX: Escaped the forward slash inside the character class [\/]
+    const pathRegex = /(?:^|\s)(\/[a-zA-Z0-9\-_\\/]+)/g;
     for (const m of line.matchAll(pathRegex)) {
       const fullMatch = m[0];
       const capture = m[1];
@@ -142,7 +135,7 @@ export const formatContent = (content: string): React.ReactNode[] => {
         parts.push(line.substring(currentIndex, m.index));
       }
 
-      // Add clickable element with indigo color to match search focus
+      // Add clickable element
       const isInternal = m.type === 'path';
       parts.push(
         <a
@@ -150,7 +143,7 @@ export const formatContent = (content: string): React.ReactNode[] => {
           href={m.href}
           target={isInternal ? undefined : "_blank"}
           rel={isInternal ? undefined : "noopener noreferrer"}
-          className={`text-indigo-600 hover:text-indigo-700 hover:underline break-all transition-colors ${m.type === 'path' ? 'font-medium' : ''} ${m.type === 'phone' ? 'whitespace-nowrap' : ''}`}
+          className={`text-indigo-600 hover:text-indigo-700 hover:underline break-all transition-colors ${m.type === 'path' ? 'font-medium underline underline-offset-4 decoration-indigo-200 hover:decoration-indigo-600' : ''} ${m.type === 'phone' ? 'whitespace-nowrap' : ''}`}
         >
           {m.text}
         </a>

@@ -32,7 +32,12 @@ const App: React.FC = () => {
       const newPage = getPageFromHash();
       setPage(newPage);
       setMode('view');
-      setSearchValue(newPage === 'home' ? '' : newPage.replace('x-', 'x/'));
+      
+      // Clear search and blur inputs after navigation
+      setSearchValue('');
+      searchRef.current?.blur();
+      homeSearchRef.current?.blur();
+      
       setError(null);
     };
 
@@ -133,7 +138,7 @@ const App: React.FC = () => {
     e.preventDefault();
     if (searchValue.trim()) {
       setHashPage(searchValue.trim());
-      setSearchValue('');
+      // Input will be cleared and blurred by the hashchange listener
     }
   };
 
@@ -291,7 +296,7 @@ const App: React.FC = () => {
             onChange={(e) => setSearchValue(sanitizePageName(e.target.value))}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
-            placeholder={`Go to page... (currently /${page})`}
+            placeholder={`${page}`}
             className={`
               w-full py-4 px-6 rounded-2xl bg-white border border-gray-200 shadow-sm
               transition-all text-lg font-medium outline-none
@@ -308,7 +313,7 @@ const App: React.FC = () => {
             id="editor"
             value={content}
             onChange={handleContentChange}
-            placeholder="Start typing your note... Use /links to connect pages."
+            placeholder="Start typing... Use /page to connect pages."
             className="w-full h-full min-h-[50vh] resize-none bg-transparent text-lg leading-relaxed mono focus:outline-none placeholder:opacity-30"
           />
         ) : (
