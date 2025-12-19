@@ -1,0 +1,5 @@
+{
+  "name": "qkrsai",
+  "description": "A minimalistic, real-time interactive text editor and viewer inspired by qk.rs, featuring live Firebase sync, text formatting, and QR code sharing.",
+  "requestFramePermissions": []
+}
