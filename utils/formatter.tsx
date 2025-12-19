@@ -1,5 +1,4 @@
-
-import React from 'react';
+import * as React from 'react';
 
 /**
  * Robust formatter that converts plain text into clickable elements.
@@ -98,8 +97,8 @@ export const formatContent = (content: string): React.ReactNode[] => {
     }
 
     // 6. Slash paths (/home, /a/b/c)
-    // CRITICAL FIX: Escaped the forward slash inside the character class [\/]
-    const pathRegex = /(?:^|\s)(\/[a-zA-Z0-9\-_\\/]+)/g;
+    // Fixed regex: removed redundant double escaping of slash
+    const pathRegex = /(?:^|\s)(\/[a-zA-Z0-9\-_/]+)/g;
     for (const m of line.matchAll(pathRegex)) {
       const fullMatch = m[0];
       const capture = m[1];
@@ -109,7 +108,7 @@ export const formatContent = (content: string): React.ReactNode[] => {
         length: capture.length,
         text: capture,
         type: 'path',
-        href: `#${capture}`
+        href: capture
       });
     }
 

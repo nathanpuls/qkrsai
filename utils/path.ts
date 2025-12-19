@@ -1,32 +1,37 @@
-
 export const sanitizePageName = (name: string): string => {
   if (!name) return 'home';
   
-  // First, strip leading and trailing slashes and whitespace
-  // This makes "/a", "a/", and "a" all point to the same page "a"
-  const trimmed = name.trim().replace(/^\/+|\/+$/g, '');
+  // Strip leading/trailing slashes, hashes and whitespace
+  const trimmed = name.trim().replace(/^[#\/]+|[#\/]+$/g, '');
   
   if (!trimmed || trimmed.toLowerCase() === 'home') return 'home';
 
   // Firebase Realtime Database forbidden characters: . $ # [ ] /
-  // We replace these with - to maintain a flat DB structure
+  // We replace them with dashes and lowercase everything for consistency
   return trimmed.replace(/[.#$[\]\s/]/g, '-').toLowerCase();
 };
 
-export const getPageFromHash = (): string => {
+export const getPageFromPath = (): string => {
   const hash = window.location.hash;
-  // Handle empty hash, #, #/, or #/home
-  if (!hash || hash === '#' || hash === '#/') return 'home';
   
-  // Support both #/page and #page
-  const rawPath = hash.startsWith('#/') ? hash.substring(2) : hash.substring(1);
-  return sanitizePageName(rawPath);
+  // Remove the # and any leading slashes to get the clean page name
+  // This handles both #/page and #page formats gracefully
+  const cleanPath = hash.replace(/^#\/?/, '');
+  
+  if (!cleanPath || cleanPath.toLowerCase() === 'home') {
+    return 'home';
+  }
+  
+  return sanitizePageName(cleanPath);
 };
 
-export const setHashPage = (page: string) => {
+export const setPathPage = (page: string) => {
   const sanitized = sanitizePageName(page);
-  // We use / prefix for a cleaner look in the URL: #/page-name
-  window.location.hash = `/${sanitized === 'home' ? '' : sanitized}`;
+  const newHash = sanitized === 'home' ? '#/' : `#/${sanitized}`;
+  
+  if (window.location.hash !== newHash) {
+    window.location.hash = newHash;
+  }
 };
 
 export const generateRandomPage = (): string => {
@@ -34,15 +39,26 @@ export const generateRandomPage = (): string => {
 };
 
 export const getCurrentURL = (): string => {
-  try {
-    return window.top?.location.href || window.location.href;
-  } catch (e) {
-    return window.location.href;
-  }
+  return window.location.href;
 };
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
+    // Fallback for non-secure contexts or older browsers
+    if (!navigator.clipboard) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return true;
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return false;
+      }
+    }
     await navigator.clipboard.writeText(text);
     return true;
   } catch (err) {

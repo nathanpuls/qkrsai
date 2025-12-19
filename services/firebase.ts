@@ -1,10 +1,5 @@
-
-/**
- * Firebase service layer for Realtime Database integration.
- * Uses modular Firebase JS SDK (v10+).
- */
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, onValue, set, get, Database } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { initializeApp, getApp, getApps } from 'firebase/app';
+import { getDatabase, ref, onValue, set, get, Database } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFP5GAwTNqLyaySh_t_2j8NFiulHTeFy8",
@@ -16,20 +11,15 @@ const firebaseConfig = {
   appId: "1:250477002363:web:95a89409c8d5991a9aacde"
 };
 
-let app: any;
-let db: Database;
-
-try {
+// Initialize Firebase using singleton pattern
+let app;
+if (!getApps().length) {
   app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
-} catch (e) {
-  console.warn("Firebase initialization failed. Using mock storage.", e);
+} else {
+  app = getApp();
 }
 
-/**
- * Root path for database entries. 
- * As requested: "qkrsai" in all lowercase.
- */
+const db: Database = getDatabase(app);
 const BASE_PATH = 'qkrsai';
 
 export const subscribeToPage = (
@@ -37,22 +27,19 @@ export const subscribeToPage = (
   callback: (content: string) => void,
   onError?: (error: any) => void
 ) => {
-  if (!db) return () => {};
   const pageRef = ref(db, `${BASE_PATH}/${pageName}`);
   return onValue(pageRef, (snapshot) => {
     const data = snapshot.val();
-    callback(typeof data === 'string' ? data : (data?.content || ''));
+    // Support both direct strings and object-wrapped content
+    const content = typeof data === 'string' ? data : (data?.content || '');
+    callback(content);
   }, (error) => {
-    console.error("Firebase Subscription Error:", error);
+    console.error("Firebase Sync Error:", error);
     if (onError) onError(error);
   });
 };
 
 export const updatePageContent = async (pageName: string, content: string) => {
-  if (!db) {
-    localStorage.setItem(`${BASE_PATH}/${pageName}`, content);
-    return;
-  }
   const pageRef = ref(db, `${BASE_PATH}/${pageName}`);
   try {
     await set(pageRef, content);
@@ -63,15 +50,13 @@ export const updatePageContent = async (pageName: string, content: string) => {
 };
 
 export const getPageContent = async (pageName: string): Promise<string> => {
-  if (!db) {
-    return localStorage.getItem(`${BASE_PATH}/${pageName}`) || '';
-  }
   const pageRef = ref(db, `${BASE_PATH}/${pageName}`);
   try {
     const snapshot = await get(pageRef);
-    return snapshot.val() || '';
+    const data = snapshot.val();
+    return typeof data === 'string' ? data : (data?.content || '');
   } catch (error) {
-    console.error("Firebase Get Error:", error);
+    console.error("Firebase Fetch Error:", error);
     throw error;
   }
 };
