@@ -205,7 +205,7 @@ const App: React.FC = () => {
         <div className="container max-w-[500px] w-[90%] text-center">
           <div className="flex items-center justify-center gap-[10px] mb-[10px] cursor-pointer group" onClick={() => setPathPage('home')}>
             <i className="ph-bold ph-bird text-[60px] text-indigo-600 group-hover:scale-110 transition-transform"></i>
-            <h1 className="text-[2rem] font-medium m-0">qkrsai</h1>
+            <h1 className="text-[2rem] font-medium m-0">qkrsai pages</h1>
           </div>
           <p className="font-light text-[1rem] mb-[30px] text-gray-400">Share text in real time with a simple path.</p>
           
